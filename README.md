@@ -69,3 +69,18 @@ curl -i http://localhost:8080/health/live
     ]
 }
 ```
+
+mvn clean quarkus:dev -DskipTests
+curl http://localhost:8080/hello
+
+mvn clean test
+
+mvn quarkus:generate-config
+
+
+
+# Build Executable JAR
+mvn clean package
+ls -1 target/*.jar
+java -Dquarkus.http.port=8081 -jar target/*-runner.jar
+
