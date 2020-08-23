@@ -84,3 +84,14 @@ mvn clean package
 ls -1 target/*.jar
 java -Dquarkus.http.port=8081 -jar target/*-runner.jar
 
+
+# redeploy
+mvn clean package -DskipTests
+oc start-build people --from-file target/*-runner.jar --follow
+oc rollout status -w dc/people
+
+PEOPLE_ROUTE_URL=$(oc get route people -o=template --template='{{.spec.host}}')
+curl http://${PEOPLE_ROUTE_URL}/person/birth/before/2000
+
+echo; echo "http://${PEOPLE_ROUTE_URL}/datatable.html" ; echo
+
