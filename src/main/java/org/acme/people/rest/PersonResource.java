@@ -3,16 +3,30 @@ package org.acme.people.rest;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.concurrent.CompletionStage;
+import java.util.concurrent.CompletableFuture;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.transaction.Transactional;
+import javax.inject.Inject;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
+
+import io.smallrye.mutiny.Uni;
+// import io.vertx.mutiny.core.eventbus.EventBus;
+// import io.vertx.axle.core.eventbus.Message;
+// import io.vertx.mutiny.core.eventbus.Message;
+import io.smallrye.mutiny.Multi;
+import io.vertx.mutiny.core.Vertx;
+// import org.jboss.resteasy.annotations.jaxrs.PathParam;
+import io.vertx.axle.core.eventbus.EventBus;
+import io.vertx.axle.core.eventbus.Message;
 
 import org.acme.people.model.DataTable;
 import org.acme.people.model.EyeColor;
@@ -94,4 +108,20 @@ public class PersonResource {
             Person.persist(p);
         }
     }
+
+    @Inject EventBus bus;
+    
+    @POST
+   @Path("/{name}")
+   @Produces(MediaType.APPLICATION_JSON)
+   public CompletionStage<String> addPerson(@PathParam("name") String name) {
+       return bus.<String>send("add-person", name).thenApply(Message::body);
+   }
+
+   @GET
+   @Path("/name/{name}")
+   @Produces(MediaType.APPLICATION_JSON)
+   public Person byName(@PathParam("name") String name) {
+       return Person.find("name", name).firstResult();
+   }
 }

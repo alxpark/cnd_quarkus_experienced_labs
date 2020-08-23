@@ -95,3 +95,10 @@ curl http://${PEOPLE_ROUTE_URL}/person/birth/before/2000
 
 echo; echo "http://${PEOPLE_ROUTE_URL}/datatable.html" ; echo
 
+
+
+# Event driven
+mvn quarkus:add-extension -Dextensions="vertx"
+mvn clean quarkus:dev
+curl -i -X POST http://localhost:8080/person/joe
+curl http://localhost:8080/person/name/joe
