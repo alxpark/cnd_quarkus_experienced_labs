@@ -3,6 +3,7 @@ package org.acme.people.rest;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.CompletableFuture;
 
@@ -19,12 +20,8 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import io.smallrye.mutiny.Uni;
-// import io.vertx.mutiny.core.eventbus.EventBus;
-// import io.vertx.axle.core.eventbus.Message;
-// import io.vertx.mutiny.core.eventbus.Message;
 import io.smallrye.mutiny.Multi;
 import io.vertx.mutiny.core.Vertx;
-// import org.jboss.resteasy.annotations.jaxrs.PathParam;
 import io.vertx.axle.core.eventbus.EventBus;
 import io.vertx.axle.core.eventbus.Message;
 
@@ -36,6 +33,10 @@ import org.acme.people.utils.CuteNameGenerator;
 import io.quarkus.panache.common.Parameters;
 import io.quarkus.runtime.StartupEvent;
 import io.quarkus.hibernate.orm.panache.PanacheQuery;
+
+import org.acme.people.model.StarWarsPerson;
+import org.acme.people.service.StarWarsService;
+import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 @Path("/person")
 @ApplicationScoped
@@ -124,4 +125,18 @@ public class PersonResource {
    public Person byName(@PathParam("name") String name) {
        return Person.find("name", name).firstResult();
    }
+
+
+   @Inject
+    @RestClient
+    StarWarsService swService;
+
+    @GET
+    @Path("/swpeople")
+    @Produces(MediaType.APPLICATION_JSON)
+    public List<StarWarsPerson> getCharacters() {
+        return IntStream.range(1, 6)
+            .mapToObj(swService::getPerson)
+            .collect(Collectors.toList());
+    }
 }

@@ -102,3 +102,24 @@ mvn quarkus:add-extension -Dextensions="vertx"
 mvn clean quarkus:dev
 curl -i -X POST http://localhost:8080/person/joe
 curl http://localhost:8080/person/name/joe
+
+# OpenTracing 
+mvn quarkus:add-extension -Dextensions="opentracing, rest-client"
+mvn clean package -DskipTests
+oc start-build people --from-file target/*-runner.jar --follow
+oc rollout status -w dc/people
+PEOPLE_ROUTE_URL=$(oc get route people -o=template --template='{{.spec.host}}')
+echo ; echo http://${PEOPLE_ROUTE_URL}/datatable.html ; echo
+
+JAEGER_ROUTE_URL=$(oc get route  jaeger -o=template --template='{{.spec.host}}')
+echo; echo https://${JAEGER_ROUTE_URL} ; echo
+
+# StarWars API
+curl https://swapi.dev/api/people/1/
+mvn clean package -DskipTests
+oc start-build people --from-file target/*-runner.jar --follow
+oc rollout status -w dc/people
+PEOPLE_ROUTE_URL=$(oc get route people -o=template --template='{{.spec.host}}')
+curl http://${PEOPLE_ROUTE_URL}/person/swpeople
+
+
